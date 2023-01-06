@@ -14,6 +14,8 @@ struct SIMD<float> {
 	using type = simde__m256;
     //Type of the integer register with the same size, in this case 32bit int
 	using intType = simde__m256i;
+	
+	using halftype = simde__m128;
 
 	//Number of floats in a float register
 	static const unsigned int count = 8;
@@ -241,6 +243,43 @@ struct SIMD<float> {
 	
 	static type set(float a) {
 		return simde_mm256_set1_ps(a);
+	}
+	
+	static halftype low_half(type a) {
+		return _mm256_castps256_ps128(a)
+	}
+	
+	static halftype high_half(type a) {
+		return _mm256_extractf128_ps(a, 1);
+	}
+	
+	static float hsum(type a) {
+		//Get 128 bit vector (4 floats)
+		halftype sum = _mm_add_ps(low_half(a), high_half(a));
+		
+		//dub = {sum[1], sum[1], sum[3], sum[3]}
+		halftype dub = _mm_movehdup_ps(sum);
+		
+		//sum = {sum[0] + sum[1], 2*sum[1], sum[2] + sum[3], 2*sum[3]}
+    	sum = _mm_add_ps(sum, dub);
+    	
+    	//dub = {sum[2] + sum[3], 2*sum[3], sum[3], sum[3]}
+    	dub = _mm_movehl_ps(dub, sum);
+    	
+    	//sum = {sum[0] + sum[1] + sum[2] + sum[3], *,*,*}
+    	sum = _mm_add_ss(sum, dub);
+    	
+    	return _mm_cvtss_f32(sum);
+	}
+	
+	static float partial_hsum(type a, size_t up_to) {
+		alignas(32) float tmp[8];
+		store(&tmp, a);
+		float sum = 0;
+		for(size_t i = 0; i < up_to; i++){
+			sum += tmp[i];
+		}
+		return sum;
 	}
 };
 
