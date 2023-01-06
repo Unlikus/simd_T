@@ -246,7 +246,7 @@ struct SIMD<float> {
 	}
 	
 	static halftype low_half(type a) {
-		return _mm256_castps256_ps128(a)
+		return _mm256_castps256_ps128(a);
 	}
 	
 	static halftype high_half(type a) {
@@ -274,7 +274,7 @@ struct SIMD<float> {
 	
 	static float partial_hsum(type a, size_t up_to) {
 		alignas(32) float tmp[8];
-		store(&tmp, a);
+		store(tmp, a);
 		float sum = 0;
 		for(size_t i = 0; i < up_to; i++){
 			sum += tmp[i];
