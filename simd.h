@@ -246,30 +246,30 @@ struct SIMD<float> {
 	}
 	
 	static halftype low_half(type a) {
-		return _mm256_castps256_ps128(a);
+		return simde_mm256_castps256_ps128(a);
 	}
 	
 	static halftype high_half(type a) {
-		return _mm256_extractf128_ps(a, 1);
+		return simde_mm256_extractf128_ps(a, 1);
 	}
 	
 	static float hsum(type a) {
 		//Get 128 bit vector (4 floats)
-		halftype sum = _mm_add_ps(low_half(a), high_half(a));
+		halftype sum = simde_mm_add_ps(low_half(a), high_half(a));
 		
 		//dub = {sum[1], sum[1], sum[3], sum[3]}
-		halftype dub = _mm_movehdup_ps(sum);
+		halftype dub = simde_mm_movehdup_ps(sum);
 		
 		//sum = {sum[0] + sum[1], 2*sum[1], sum[2] + sum[3], 2*sum[3]}
-    	sum = _mm_add_ps(sum, dub);
+    	sum = simde_mm_add_ps(sum, dub);
     	
     	//dub = {sum[2] + sum[3], 2*sum[3], sum[3], sum[3]}
-    	dub = _mm_movehl_ps(dub, sum);
+    	dub = simde_mm_movehl_ps(dub, sum);
     	
     	//sum = {sum[0] + sum[1] + sum[2] + sum[3], *,*,*}
-    	sum = _mm_add_ss(sum, dub);
+    	sum = simde_mm_add_ss(sum, dub);
     	
-    	return _mm_cvtss_f32(sum);
+    	return simde_mm_cvtss_f32(sum);
 	}
 	
 	static float partial_hsum(type a, size_t up_to) {
