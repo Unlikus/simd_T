@@ -2,7 +2,7 @@
 #define SIMD_H
 
 #include "simde/simde/x86/avx2.h"
-#include <cfloat>
+#include <cstring>
 #include <iostream>
 
 template<typename F, int N>
@@ -43,6 +43,17 @@ struct SIMD<float, 8> {
 
 	void storeU(float* ptr) {
 		simde_mm256_storeu_ps(ptr, data);
+	}
+
+	//Print:
+
+	void print() {
+		float tmp[lanes];
+		std::memcpy(tmp, &data, lanes * sizeof(float));
+		for(int i = 0; i < lanes; i++) {
+			std::cout << tmp[i] << " ";
+		}
+		std::cout << "\n";
 	}
 
 	//Unary arithmetic:
@@ -105,6 +116,49 @@ struct SIMD<float, 8> {
 
 	self operator^(self other) {
 		return {simde_mm256_xor_ps(data, other.data)};
+	}
+
+	// ~self & other
+	self andnot(self other) {
+		return {simde_mm256_andnot_ps(data, other.data)};
+	}
+
+	//Compare (IEEE754)
+
+	self operator<(self other) {
+		return {simde_mm256_cmp_ps(data, other.data, SIMDE_CMP_LT_OQ)};
+	}
+
+	self operator<=(self other) {
+		return {simde_mm256_cmp_ps(data, other.data, SIMDE_CMP_LE_OQ)};
+	}
+
+	self operator>(self other) {
+		return {simde_mm256_cmp_ps(data, other.data, SIMDE_CMP_GT_OQ)};
+	}
+
+	self operator>=(self other) {
+		return {simde_mm256_cmp_ps(data, other.data, SIMDE_CMP_GE_OQ)};
+	}
+
+	self operator==(self other) {
+		return {simde_mm256_cmp_ps(data, other.data, SIMDE_CMP_EQ_OQ)};
+	}
+
+	self operator!=(self other) {
+		return {simde_mm256_cmp_ps(data, other.data, SIMDE_CMP_NEQ_UQ)}; //Here we use the unordered version because Nan != Nan is True
+	}
+
+	//Blend
+
+	//Select other where mask is 1 and self where mask is 0
+	template<int mask>
+	self blend(self other) {
+		return {simde_mm256_blend_ps(data, other.data, mask)};
+	}
+
+	self blendv(self other, self mask) {
+		return {simde_mm256_blendv_ps(data, other.data, mask.data)};
 	}
 
 };

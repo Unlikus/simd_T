@@ -1,8 +1,13 @@
 #include "simd.h"
 #include <iostream>
 
+using f8 = SIMD<float, 8>;
+
 int main() {
-	auto reg = SIMD<float, 8>::set(4.5f);
-	reg = reg.floor();
-	std::cout << std::is_pod<SIMD<float, 8>>::value << std::endl;
+	auto a = f8::set(4.5f);
+	auto b = f8::set(5.0f);
+	
+	
+	auto c = a.blend<15>(b);
+	c.print();
 }
