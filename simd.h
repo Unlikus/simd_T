@@ -281,6 +281,10 @@ struct SIMD<float> {
 		}
 		return sum;
 	}
+	
+	static float extract_first(type x) {
+		return simde_mm256_cvtss_f32(x);
+	}
 };
 
 template<>
@@ -566,6 +570,10 @@ struct SIMD<double> {
 
 	static intType setInt(int64_t a) {
 		return simde_mm256_set1_epi64x(a);
+	}
+	
+	static double extract_first(type x) {
+		return simde_mm256_cvtss_f64(x);
 	}
 };
 
