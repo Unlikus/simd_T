@@ -573,7 +573,7 @@ struct SIMD<double> {
 	}
 	
 	static double extract_first(type x) {
-		return simde_mm256_cvtss_f64(x);
+		return simde_mm256_cvtsd_f64(x);
 	}
 };
 
