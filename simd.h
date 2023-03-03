@@ -285,6 +285,10 @@ struct SIMD<float> {
 	static float extract_first(type x) {
 		return simde_mm256_cvtss_f32(x);
 	}
+	
+	static type rcp(type x) {
+		return simde_mm256_rcp_ps(x);
+	}
 };
 
 template<>
@@ -574,6 +578,10 @@ struct SIMD<double> {
 	
 	static double extract_first(type x) {
 		return simde_mm256_cvtsd_f64(x);
+	}
+	
+	static type rcp(type x) {
+		return div(set(1.0), x);
 	}
 };
 
