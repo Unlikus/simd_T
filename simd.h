@@ -543,6 +543,10 @@ struct SIMD<double> {
 	static type sub(type a, type b) {
 		return simde_mm256_sub_pd(a, b);
 	}
+	
+	static type div(type a, type b) {
+		return simde_mm256_div_pd(a,b);
+	}
 
 	static intType sub(intType a, intType b) {
 		return simde_mm256_sub_epi64(a, b);
