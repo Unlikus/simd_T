@@ -297,6 +297,8 @@ struct SIMD<double> {
 	using type = simde__m256d;
 
 	using intType = simde__m256i;
+	
+	using halftype = simde__m128d;
 
 	//Number of doubles in a double register
 	static const unsigned int count = 4;
@@ -586,6 +588,41 @@ struct SIMD<double> {
 	
 	static type rcp(type x) {
 		return div(set(1.0), x);
+	}
+	
+	static halftype low_half(type a) {
+		return simde_mm256_castpd256_pd128(a);
+	}
+	
+	static halftype high_half(type a) {
+		return simde_mm256_extractf128_pd(a, 1);
+	}
+	
+	static double hsum(type a) {
+		//Get 128 bit vector (2 double)
+		halftype sum = simde_mm_add_pd(low_half(a), high_half(a));
+		
+		halftype high = simde_mm_unpackhi_pd(sum, sum);
+		
+    	sum = simde_mm_add_sd(sum, high);
+    	
+    	return simde_mm_cvtsd_f64(sum);
+	}
+	
+	static double partial_hsum_like_hsum(type a) {
+		alignas(32) double tmp[4];
+		store(tmp, a);
+		return (tmp[0] + tmp[2]) + (tmp[1] + tmp[3]);
+	}
+	
+	static double partial_hsum(type a, size_t up_to) {
+		alignas(32) double tmp[4];
+		store(tmp, a);
+		double sum = 0;
+		for(size_t i = 0; i < up_to; i++){
+			sum += tmp[i];
+		}
+		return sum;
 	}
 };
 
